@@ -2,34 +2,43 @@ name: Update Dualis Calendar
 
 on:
   schedule:
-    - cron: '0 4 * * *' # Täglich um 04:00 UTC
-  workflow_dispatch: # Erlaubt manuelles Starten zum Testen
+    # Läuft jeden Tag um 04:00 Uhr UTC (ca. 05:00 Uhr deutscher Zeit)
+    - cron: '0 4 * * *'
+  workflow_dispatch: # Ermöglicht es dir, das Skript jederzeit manuell zu starten
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
 
+    steps:
+      # 1. Den Code aus deinem Repository auschecken
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Node.js Umgebung einrichten
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # 3. Benötigte Bibliotheken installieren
       - name: Install Dependencies
         run: npm install ics
 
-      - name: Run Scraper
+      # 4. Das Scraper-Skript ausführen
+      # Hier werden die Secrets (User/Pass) sicher übergeben
+      - name: Run Dualis Scraper
         env:
           DUALIS_USER: ${{ secrets.DUALIS_USER }}
           DUALIS_PASS: ${{ secrets.DUALIS_PASS }}
         run: node index.js
 
-      - name: Commit and Push
+      # 5. Die erstellte .ics Datei zurück ins Repo laden
+      - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add dualis_calendar.ics
-          git commit -m "Update calendar: $(date)" || echo "No changes to commit"
+          git add termine.ics
+          # Nur committen, wenn sich die Datei tatsächlich geändert hat
+          git commit -m "Update Kalender: $(date +'%d.%m.%Y')" || echo "Keine Änderungen gefunden"
           git push
