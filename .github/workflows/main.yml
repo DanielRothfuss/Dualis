@@ -1,0 +1,35 @@
+name: Update Dualis Calendar
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # Täglich um 04:00 UTC
+  workflow_dispatch: # Erlaubt manuelles Starten zum Testen
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install ics
+
+      - name: Run Scraper
+        env:
+          DUALIS_USER: ${{ secrets.DUALIS_USER }}
+          DUALIS_PASS: ${{ secrets.DUALIS_PASS }}
+        run: node index.js
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add dualis_calendar.ics
+          git commit -m "Update calendar: $(date)" || echo "No changes to commit"
+          git push
