@@ -1,0 +1,9 @@
+{
+  "name": "dualis-scraper",
+  "version": "1.0.0",
+  "description": "Dualis Kalender Export",
+  "main": "index.js",
+  "dependencies": {
+    "ics": "^3.5.0"
+  }
+}
