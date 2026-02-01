@@ -25,6 +25,9 @@ jobs:
       - name: Install Dependencies
         run: npm install ics
 
+      - name: Set Timezone
+        run: sudo timedatectl set-timezone Europe/Berlin
+
       # 4. Das Scraper-Skript ausführen
       # Hier werden die Secrets (User/Pass) sicher übergeben
       - name: Run Dualis Scraper
