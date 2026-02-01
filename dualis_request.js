@@ -113,9 +113,19 @@ function parse(html) {
 }
 
 function createICS(scheduleArray) {
-  if (scheduleArray.length === 0) return;
+  if (!scheduleArray || scheduleArray.length === 0) {
+    console.log("Keine Termine zum Speichern gefunden.");
+    return;
+  }
 
-  const { error, value } = ics.createEvents(scheduleArray);
+  // Konfiguration für den Kalender-Header
+  const calendarOptions = {
+    calName: 'DHBW Dualis', // So wird der Kalender in deiner App heißen
+    method: 'PUBLISH',      // Signalisiert, dass dies ein Abo-Kalender ist
+    productId: 'dualis-scraper-v1'
+  };
+
+  const { error, value } = ics.createEvents(scheduleArray, calendarOptions);
 
   if (error) {
     console.error("Fehler beim Erstellen der ICS:", error);
@@ -123,7 +133,7 @@ function createICS(scheduleArray) {
   }
 
   fs.writeFileSync('termine.ics', value);
-  console.log("✅ Datei 'termine.ics' wurde erfolgreich erstellt.");
+  console.log("✅ Datei 'termine.ics' wurde mit Namen 'DHBW Dualis' erstellt.");
 }
 
 getDashboard();
