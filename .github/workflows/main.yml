@@ -31,7 +31,7 @@ jobs:
         env:
           DUALIS_USER: ${{ secrets.DUALIS_USER }}
           DUALIS_PASS: ${{ secrets.DUALIS_PASS }}
-        run: node index.js
+        run: node dualis_request.js
 
       # 5. Die erstellte .ics Datei zurück ins Repo laden
       - name: Commit and Push Changes
