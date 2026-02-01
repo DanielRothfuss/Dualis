@@ -4,12 +4,6 @@ const ics = require('ics');
 // Variablen aus GitHub Secrets/Environment
 const usrname = process.env.DUALIS_USER;
 const pass = process.env.DUALIS_PASS;
-// Aktuelles Datum für die Abfrage (YYYYMMDD)
-const date = new Date().toLocaleDateString('de-DE', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric'
-});
 
 async function getDashboard() {
   try {
@@ -19,21 +13,31 @@ async function getDashboard() {
 
     const refreshHeader = login.headers.get('refresh');
     if (!refreshHeader) throw new Error("Login fehlgeschlagen - Checke deine Credentials!");
-    
+
     const urlPart = refreshHeader.match(/ARGUMENTS=(-N\d+)/)[1];
     const cookieHeader = login.headers.get('set-cookie');
     const cookieValue = cookieHeader.match(/cnsc\s*=\s*([^;]+)/)[1];
 
-    const response = await fetch(`https://dualis.dhbw.de/scripts/mgrqispi.dll?APPNAME=CampusNet&PRGNAME=SCHEDULERPRINT&ARGUMENTS=${urlPart},-N000028,-A${date},-A,-N1`, {
-      method: 'GET',
-      headers: { 'Cookie': `cnsc=${cookieValue}` }
-    });
+    let scheduleArray;
 
-    const html = await response.text();
-    const scheduleArray = parse(html);
+    for (let i = 0; i < 3; i++) {
+      const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 * i).toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+
+      const response = await fetch(`https://dualis.dhbw.de/scripts/mgrqispi.dll?APPNAME=CampusNet&PRGNAME=SCHEDULERPRINT&ARGUMENTS=${urlPart},-N000028,-A${date},-A,-N1`, {
+        method: 'GET',
+        headers: { 'Cookie': `cnsc=${cookieValue}` }
+      });
+
+      const html = await response.text();
+      scheduleArray.push(parse(html));
+    }
 
     console.log(scheduleArray);
-    
+
     createICS(scheduleArray);
 
     // Logout
