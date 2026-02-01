@@ -33,7 +33,7 @@ async function getDashboard() {
       });
 
       const html = await response.text();
-      scheduleArray.push(parse(html));
+      scheduleArray.push(...parse(html));
     }
 
     console.log(scheduleArray);
