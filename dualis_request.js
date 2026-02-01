@@ -18,7 +18,7 @@ async function getDashboard() {
     const cookieHeader = login.headers.get('set-cookie');
     const cookieValue = cookieHeader.match(/cnsc\s*=\s*([^;]+)/)[1];
 
-    let scheduleArray;
+    let scheduleArray = [];
 
     for (let i = 0; i < 3; i++) {
       const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 * i).toLocaleDateString('de-DE', {
