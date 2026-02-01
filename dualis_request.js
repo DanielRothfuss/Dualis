@@ -31,6 +31,8 @@ async function getDashboard() {
 
     const html = await response.text();
     const scheduleArray = parse(html);
+
+    console.log(scheduleArray);
     
     createICS(scheduleArray);
 
@@ -48,6 +50,13 @@ async function getDashboard() {
 function parse(html) {
   const results = [];
   let currentDate = "";
+  
+  // Mapping für deutsche Monatskürzel
+  const monthMap = {
+    'Jan': 1, 'Feb': 2, 'Mär': 3, 'Apr': 4, 'Mai': 5, 'Jun': 6,
+    'Jul': 7, 'Aug': 8, 'Sep': 9, 'Okt': 10, 'Nov': 11, 'Dez': 12
+  };
+
   const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/g;
   const dateRegex = /class="tbhead"[^>]*>([^<]+)</;
   const cellRegex = /<td[^>]*>([\s\S]*?)<\/td>/g;
@@ -57,8 +66,20 @@ function parse(html) {
   while ((rowMatch = rowRegex.exec(html)) !== null) {
     const rowContent = rowMatch[1];
     const dateMatch = rowContent.match(dateRegex);
+
     if (dateMatch) {
-      currentDate = dateMatch[1].trim(); // Erwartet Format: DD.MM.YYYY
+      // Wandelt "Mo, 26. Jan. 2026" in ein Objekt {day: 26, month: 1, year: 2026} um
+      const rawDate = dateMatch[1].trim(); 
+      try {
+        const parts = rawDate.replace(/^[A-Za-z]{2}, /, "").split('. ');
+        currentDate = {
+          day: parseInt(parts[0]),
+          month: monthMap[parts[1].replace('.', '')],
+          year: parseInt(parts[2])
+        };
+      } catch (e) {
+        console.error("Datum konnte nicht parsen:", rawDate);
+      }
       continue;
     }
 
@@ -70,14 +91,16 @@ function parse(html) {
       }
 
       if (cells.length >= 5 && currentDate) {
-        const [beginn, ende] = cells[3].split(' - ').map(t => t.trim());
+        const times = cells[3].split(' - ').map(t => t.trim());
+        const start = times[0].split(':').map(Number);
+        const end = times[1].split(':').map(Number);
+
         results.push({
-          datum: currentDate,
-          veranstaltung: cells[1],
-          lehrende: cells[2],
-          beginn,
-          ende,
-          raum: cells[4]
+          title: cells[1],
+          start: [currentDate.year, currentDate.month, currentDate.day, start[0], start[1]],
+          end: [currentDate.year, currentDate.month, currentDate.day, end[0], end[1]],
+          location: cells[4],
+          description: `Lehrende: ${cells[2]}`
         });
       }
     }
@@ -85,26 +108,18 @@ function parse(html) {
   return results;
 }
 
-function createICS(events) {
-  const icsEvents = events.map(e => {
-    const [day, month, year] = e.datum.split('.').map(Number);
-    const [startH, startM] = e.beginn.split(':').map(Number);
-    const [endH, endM] = e.ende.split(':').map(Number);
+function createICS(scheduleArray) {
+  if (scheduleArray.length === 0) return;
 
-    return {
-      title: e.veranstaltung,
-      location: e.raum,
-      description: `Lehrende: ${e.lehrende}`,
-      start: [year, month, day, startH, startM],
-      end: [year, month, day, endH, endM]
-    };
-  });
+  const { error, value } = ics.createEvents(scheduleArray);
 
-  const { error, value } = ics.createEvents(icsEvents);
-  if (error) throw error;
+  if (error) {
+    console.error("Fehler beim Erstellen der ICS:", error);
+    return;
+  }
 
-  fs.writeFileSync(`${__dirname}/dualis_calendar.ics`, value);
-  console.log("ICS Datei erfolgreich erstellt!");
+  fs.writeFileSync('termine.ics', value);
+  console.log("✅ Datei 'termine.ics' wurde erfolgreich erstellt.");
 }
 
 getDashboard();
