@@ -33,7 +33,7 @@ async function getDashboard() {
       });
 
       const html = await response.text();
-      fs.writeFileSync('termine.ics', html);
+      //fs.writeFileSync('termine.ics', html);
       scheduleArray.push(...parse(html));
     }
 
@@ -139,7 +139,7 @@ function createICS(scheduleArray) {
     return;
   }
 
-  //fs.writeFileSync('termine.ics', value);
+  fs.writeFileSync('termine.ics', value);
   console.log("✅ Datei 'termine.ics' wurde mit Namen 'DHBW Dualis' erstellt.");
 }
 
