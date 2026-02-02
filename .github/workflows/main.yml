@@ -34,6 +34,7 @@ jobs:
         env:
           DUALIS_USER: ${{ secrets.DUALIS_USER }}
           DUALIS_PASS: ${{ secrets.DUALIS_PASS }}
+          TZ: Europe/Berlin
         run: node dualis_request.js
 
       # 5. Die erstellte .ics Datei zurück ins Repo laden
