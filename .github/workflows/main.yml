@@ -25,8 +25,8 @@ jobs:
       - name: Install Dependencies
         run: npm install ics
 
-      - name: Set Timezone
-        run: sudo timedatectl set-timezone Europe/Berlin
+      # - name: Set Timezone
+      #   run: sudo timedatectl set-timezone Europe/Berlin
 
       # 4. Das Scraper-Skript ausführen
       # Hier werden die Secrets (User/Pass) sicher übergeben
@@ -34,7 +34,7 @@ jobs:
         env:
           DUALIS_USER: ${{ secrets.DUALIS_USER }}
           DUALIS_PASS: ${{ secrets.DUALIS_PASS }}
-          TZ: Europe/Berlin
+          # TZ: Europe/Berlin
         run: node dualis_request.js
 
       # 5. Die erstellte .ics Datei zurück ins Repo laden
