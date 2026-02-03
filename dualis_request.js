@@ -105,9 +105,7 @@ function parse(html) {
           start: [currentDate.year, currentDate.month, currentDate.day, start[0], start[1]],
           end: [currentDate.year, currentDate.month, currentDate.day, end[0], end[1]],
           location: cells[4],
-          description: `Lehrende: ${cells[2]}`,
-          // startInputType: 'local',
-          // startOutputType: 'local'
+          description: `Lehrende: ${cells[2]}\nUnit-Nr.: ${cells[0]}`
         });
       }
     }
@@ -129,10 +127,6 @@ function createICS(scheduleArray) {
   };
 
   const { error, value } = ics.createEvents(scheduleArray, calendarOptions);
-
-  // const fixedValue = value
-  //   .replace(/DTSTART:/g, 'DTSTART;TZID=Europe/Berlin:')
-  //   .replace(/DTEND:/g, 'DTEND;TZID=Europe/Berlin:');
 
   if (error) {
     console.error("Fehler beim Erstellen der ICS:", error);
