@@ -76,7 +76,7 @@ function parse(html) {
       // Wandelt "Mo, 26. Jan. 2026" in ein Objekt {day: 26, month: 1, year: 2026} um
       const rawDate = dateMatch[1].trim(); 
       try {
-        const parts = rawDate.replace(/^[A-Za-z]{2}, /, "").split('. ');
+        const parts = rawDate.replace(/^[A-Za-z]{2}, /, "").replace(/\./, "").split(' ');
         currentDate = {
           day: parseInt(parts[0]),
           month: monthMap[parts[1].replace('.', '')],
